@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sales Dashboard — Valentina Restrepo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   CSS VARIABLES — LIGHT & DARK MODE + DYNAMIC ACCENT
+   ============================================================ */
+:root {
+  --accent: #F5C842;
+  --accent-rgb: 245, 200, 66;
+  --accent-dark: #d4a800;
+  --bg: #F9F7F2;
+  --bg2: #FFF8E7;
+  --card: #F0EFEB;
+  --card2: #ffffff;
+  --text: #1A1A1A;
+  --text2: #9A9A9A;
+  --border: rgba(0,0,0,0.06);
+  --navbar-bg: rgba(249,247,242,0.85);
+  --dark-card: #2D2D2D;
+  --green: #A8D5B5;
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  --radius: 24px;
+  --radius-sm: 14px;
+}
+[data-theme="dark"] {
+  --bg: #121212;
+  --bg2: #1A1A1A;
+  --card: #1E1E1E;
+  --card2: #252525;
+  --text: #F0EFEB;
+  --text2: #7A7A7A;
+  --border: rgba(255,255,255,0.08);
+  --navbar-bg: rgba(18,18,18,0.9);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes springIn {
+    0%   { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+    70%  { transform: scale(1.12) rotate(3deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(168,213,181,0.7); }
+    50%       { box-shadow: 0 0 0 6px rgba(168,213,181,0); }
+  }
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb),0.4); }
+    50%       { box-shadow: 0 0 0 8px rgba(var(--accent-rgb),0); }
+  }
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+  }
+  @keyframes slideLeft {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes checkPop {
+    0%   { transform: scale(0) rotate(-45deg); }
+    60%  { transform: scale(1.3) rotate(8deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .card { animation: fadeUp 0.5s ease both; }
+  .card:nth-child(1)  { animation-delay: 0.05s; }
+  .card:nth-child(2)  { animation-delay: 0.10s; }
+  .card:nth-child(3)  { animation-delay: 0.15s; }
+  .card:nth-child(4)  { animation-delay: 0.20s; }
+  .card:nth-child(5)  { animation-delay: 0.25s; }
+  .card:nth-child(6)  { animation-delay: 0.30s; }
+  .card:nth-child(7)  { animation-delay: 0.35s; }
+  .card:nth-child(8)  { animation-delay: 0.40s; }
+  .avatar-img { animation: springIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.2s; }
+  .status-dot { animation: pulse 2s infinite; }
+  .today-cell { animation: glow 2s infinite; }
+  .bar { animation: barGrow 0.6s ease both; transform-origin: bottom; }
+  .bar:nth-child(1) { animation-delay: 0.1s; }
+  .bar:nth-child(2) { animation-delay: 0.15s; }
+  .bar:nth-child(3) { animation-delay: 0.2s; }
+  .bar:nth-child(4) { animation-delay: 0.25s; }
+  .bar:nth-child(5) { animation-delay: 0.3s; }
+  .bar:nth-child(6) { animation-delay: 0.35s; }
+  .bar:nth-child(7) { animation-delay: 0.4s; }
+  .cal-event { animation: slideLeft 0.4s ease both; }
+  .cal-event:nth-child(1) { animation-delay: 0.1s; }
+  .cal-event:nth-child(2) { animation-delay: 0.2s; }
+  .ranking-row { animation: fadeUp 0.4s ease both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 32px;
+  background: var(--navbar-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+.nav-logo {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo span { color: var(--accent); }
+.nav-links { display: flex; gap: 6px; }
+.nav-link {
+  padding: 7px 16px; border-radius: 999px;
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--text2); background: transparent;
+  border: none; cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.nav-link:hover, .nav-link.active {
+  background: rgba(var(--accent-rgb),0.15);
+  color: var(--text);
+}
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.btn-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--card); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); font-size: 1rem;
+  transition: background 0.2s, transform 0.15s;
+  box-shadow: var(--shadow);
+}
+.btn-icon:hover { transform: scale(1.08); }
+.btn-dark {
+  padding: 7px 14px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600;
+  background: var(--card); border: none; cursor: pointer;
+  color: var(--text); box-shadow: var(--shadow);
+  transition: background 0.2s;
+}
+
+/* ============================================================
+   PAGE TABS
+   ============================================================ */
+.tab-bar {
+  display: flex; gap: 8px; padding: 20px 32px 0;
+  max-width: 1320px; margin: 0 auto;
+}
+.tab-btn {
+  padding: 9px 22px; border-radius: 999px;
+  font-size: 0.9rem; font-weight: 600;
+  border: none; cursor: pointer;
+  background: var(--card); color: var(--text2);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.tab-btn.active {
+  background: var(--accent); color: #1A1A1A;
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb),0.35);
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+.page { display: none; padding: 24px 32px 48px; max-width: 1320px; margin: 0 auto; }
+.page.active { display: block; }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 1fr 280px;
+  grid-template-rows: auto auto auto;
+  gap: 20px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--card2);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+}
+.card:hover { transform: scale(1.01); box-shadow: var(--shadow-lg); }
+.card-dark {
+  background: var(--dark-card) !important;
+  color: #F0EFEB;
+}
+.card-dark .text2 { color: rgba(240,239,235,0.5); }
+
+/* ============================================================
+   PROFILE CARD
+   ============================================================ */
+/* ==========================
+   👤 PROFILE SECTION START
+   Employee: Valentina Restrepo
+   Role: Senior Product Designer
+   Dept: Design & Innovation
+   Salary: $94,500
+   Location: Medellín, Colombia
+   Joined: March 2021
+   ========================== */
+.profile-card { grid-column: 1; grid-row: 1; }
+.avatar-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+.avatar-img {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #ff9f43 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 700; color: #fff;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+}
+.avatar-img:hover {
+  transform: rotate(8deg) scale(1.08);
+  box-shadow: 0 8px 24px rgba(var(--accent-rgb),0.4);
+}
+/* ONLINE STATUS DOT */
+.status-dot {
+  position: absolute; bottom: 4px; right: 4px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--green); border: 2px solid var(--card2);
+}
+/* EMPLOYEE NAME — Valentina Restrepo */
+.profile-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+/* EMPLOYEE ROLE — Senior Product Designer */
+.profile-role { font-size: 0.85rem; color: var(--text2); margin-bottom: 14px; }
+/* EMPLOYEE SALARY — $94,500/year */
+.salary-badge {
+  display: inline-block; padding: 5px 14px;
+  background: var(--accent); color: #1A1A1A;
+  border-radius: 999px; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.salary-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb),0.45);
+}
+.profile-meta { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.profile-meta-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text2); }
+.profile-meta-row svg { flex-shrink: 0; }
+
+/* ============================================================
+   KPI CHIPS
+   ============================================================ */
+.kpi-row { grid-column: 4; grid-row: 1; display: flex; flex-direction: column; gap: 12px; }
+.kpi-chip {
+  background: var(--card2); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow); padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+  animation: fadeUp 0.5s ease both;
+}
+.kpi-chip:hover { transform: scale(1.03); box-shadow: var(--shadow-lg); }
+.kpi-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(var(--accent-rgb),0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.kpi-num { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+.kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+
+/* ============================================================
+   BAR CHART
+   ============================================================ */
+.chart-card { grid-column: 2 / 4; grid-row: 1; }
+.chart-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+.chart-sub { font-size: 0.8rem; color: var(--text2); margin-bottom: 24px; }
+.bar-chart {
+  display: flex; align-items: flex-end; gap: 10px;
+  height: 120px;
+}
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; }
+.bar {
+  width: 100%; border-radius: 8px 8px 0 0;
+  background: var(--card);
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+.bar.today { background: var(--accent); }
+.bar-label { font-size: 0.7rem; color: var(--text2); font-weight: 500; }
+
+/* ============================================================
+   TIMER / DONUT
+   ============================================================ */
+.timer-card { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-wrap { position: relative; width: 120px; height: 120px; margin-bottom: 16px; }
+.donut-wrap svg { transform: rotate(-90deg); }
+.donut-track { fill: none; stroke: var(--card); stroke-width: 10; }
+.donut-fill { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+.timer-display {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.timer-time { font-size: 1.1rem; font-weight: 700; }
+.timer-label { font-size: 0.65rem; color: var(--text2); }
+.timer-controls { display: flex; gap: 10px; }
+.timer-btn {
+  padding: 8px 18px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600;
+  border: none; cursor: pointer;
+  background: rgba(var(--accent-rgb),0.15); color: var(--text);
+  transition: background 0.2s;
+}
+.timer-btn:hover { background: var(--accent); color: #1A1A1A; }
+
+/* ============================================================
+   CALENDAR
+   ============================================================ */
+.calendar-card { grid-column: 2 / 4; grid-row: 2; }
+.week-strip { display: flex; gap: 8px; margin-bottom: 20px; }
+.day-cell {
+  flex: 1; text-align: center; padding: 10px 6px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.2s;
+}
+.day-cell:hover { background: rgba(var(--accent-rgb),0.1); }
+.day-cell .day-name { font-size: 0.7rem; color: var(--text2); font-weight: 500; margin-bottom: 6px; }
+.day-cell .day-num { font-size: 1rem; font-weight: 700; }
+.today-cell {
+  background: var(--accent) !important;
+  border-radius: var(--radius-sm);
+}
+.today-cell .day-name, .today-cell .day-num { color: #1A1A1A !important; }
+.cal-events { display: flex; flex-direction: column; gap: 8px; }
+.cal-event {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 500;
+}
+.cal-event-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cal-event-time { font-size: 0.72rem; color: var(--text2); margin-left: auto; white-space: nowrap; }
+.cal-avatars { display: flex; margin-left: 8px; }
+.cal-avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: #fff;
+  margin-left: -6px; border: 2px solid var(--card2);
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+.onboarding-card { grid-column: 4; grid-row: 2; }
+.onboarding-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.onboarding-title { font-size: 0.95rem; font-weight: 600; color: #F0EFEB; }
+.onboarding-counter { font-size: 0.85rem; font-weight: 700; color: var(--accent); }
+.onboarding-progress { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); margin-bottom: 18px; overflow: hidden; }
+.onboarding-bar { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+.task-list { display: flex; flex-direction: column; gap: 10px; }
+.task-item {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.task-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  font-size: 0.7rem; color: #1A1A1A;
+}
+.task-item.done .task-check {
+  background: var(--accent); border-color: var(--accent);
+  animation: checkPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.task-text { font-size: 0.82rem; color: rgba(240,239,235,0.9); }
+.task-time { font-size: 0.72rem; color: rgba(240,239,235,0.4); margin-left: auto; }
+.task-item.done .task-text { text-decoration: line-through; opacity: 0.5; }
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+.accordion-card { grid-column: 1; grid-row: 3; }
+.accordion-title-main { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
+.accordion-item { border-bottom: 1px solid var(--border); }
+.accordion-item:last-child { border-bottom: none; }
+.accordion-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; cursor: pointer;
+  font-size: 0.88rem; font-weight: 500;
+  transition: color 0.2s;
+}
+.accordion-header:hover { color: var(--accent); }
+.accordion-chevron {
+  transition: transform 0.3s; font-size: 0.8rem; color: var(--text2);
+}
+.accordion-item.open .accordion-chevron { transform: rotate(90deg); }
+.accordion-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  font-size: 0.82rem; color: var(--text2);
+}
+.accordion-item.open .accordion-body { max-height: 200px; padding-bottom: 14px; }
+.accordion-body ul { padding-left: 16px; display: flex; flex-direction: column; gap: 5px; }
+
+/* ============================================================
+   APPEARANCE CARD
+   ============================================================ */
+.appearance-card { grid-column: 2 / 4; grid-row: 3; }
+.appearance-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.swatch {
+  width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer; border: 3px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: #fff;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.swatch:hover { transform: scale(1.12); }
+.swatch.active { border-color: var(--text); }
+.custom-color-row { display: flex; align-items: center; gap: 12px; }
+.custom-color-label { font-size: 0.82rem; color: var(--text2); }
+.custom-preview { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); }
+.custom-hex { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+input[type="color"] { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; padding: 0; background: none; }
+
+/* ============================================================
+   RANKINGS PAGE
+   ============================================================ */
+.rankings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.rankings-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.rank-stat-card {
+  background: var(--card2); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow); padding: 20px;
+  text-align: center;
+}
+.rank-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+.rank-stat-label { font-size: 0.78rem; color: var(--text2); margin-top: 4px; }
+.leaderboard-card { background: var(--card2); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+.leaderboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.leaderboard-title { font-size: 1rem; font-weight: 700; }
+.period-pill {
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(var(--accent-rgb),0.15); color: var(--text);
+  font-size: 0.75rem; font-weight: 600;
+}
+.ranking-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.2s, transform 0.2s;
+  margin-bottom: 8px;
+}
+.ranking-row:hover { background: rgba(var(--accent-rgb),0.08); transform: translateX(4px); }
+.medal { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.medal-1 { background: #FFD700; color: #1A1A1A; }
+.medal-2 { background: #C0C0C0; color: #1A1A1A; }
+.medal-3 { background: #CD7F32; color: #fff; }
+.medal-n { background: var(--card); color: var(--text2); }
+.rank-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.rank-info { flex: 1; min-width: 0; }
+.rank-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-role { font-size: 0.72rem; color: var(--text2); }
+.rank-bar-wrap { width: 80px; }
+.rank-bar-bg { height: 5px; border-radius: 3px; background: var(--card); overflow: hidden; }
+.rank-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s ease, background 0.3s; }
+.rank-value { font-size: 0.85rem; font-weight: 700; text-align: right; min-width: 70px; }
+.rank-trend { font-size: 0.72rem; text-align: right; }
+.trend-up { color: #22C55E; }
+.trend-down { color: #EF4444; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+  .profile-card { grid-column: 1; grid-row: auto; }
+  .kpi-row { grid-column: 2; grid-row: auto; flex-direction: row; flex-wrap: wrap; }
+  .chart-card { grid-column: 1 / 3; }
+  .timer-card { grid-column: 1; }
+  .calendar-card { grid-column: 1 / 3; }
+  .onboarding-card { grid-column: 2; }
+  .accordion-card { grid-column: 1; }
+  .appearance-card { grid-column: 1 / 3; }
+  .rankings-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .navbar { padding: 12px 16px; }
+  .nav-links { display: none; }
+  .page { padding: 16px 16px 40px; }
+  .tab-bar { padding: 16px 16px 0; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .chart-card, .calendar-card, .appearance-card, .kpi-row { grid-column: 1; }
+  .kpi-row { flex-direction: column; }
+  .rankings-stats { grid-template-columns: 1fr; }
+  .leaderboard-card { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="navbar">
+  <div class="nav-logo">
+    ⚡ <span>Sales</span>Board
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="switchTab('dashboard', this)">Dashboard</button>
+    <button class="nav-link" onclick="switchTab('rankings', this)">🏆 Rankings</button>
+    <button class="nav-link" onclick="switchTab('dashboard', this)">Equipo</button>
+    <button class="nav-link" onclick="switchTab('dashboard', this)">Reportes</button>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-icon" title="Notificaciones">🔔</button>
+    <button class="btn-icon" title="Perfil">👤</button>
+    <button class="btn-dark" id="themeToggle" onclick="toggleTheme()">🌙 Dark</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     PAGE TABS
+     ============================================================ -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-dashboard" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+  <button class="tab-btn" id="tab-rankings" onclick="switchTab('rankings', this)">🏆 Rankings</button>
+</div>
+
+<!-- ============================================================
+     DASHBOARD PAGE
+     ============================================================ -->
+<div class="page active" id="page-dashboard">
+  <div class="dashboard-grid">
+
+    <!-- ==========================
+         👤 PROFILE CARD
+         Employee: Valentina Restrepo
+         ========================== -->
+    <div class="card profile-card">
+      <div class="avatar-wrap">
+        <!-- PROFILE AVATAR — Valentina Restrepo initials -->
+        <div class="avatar-img" title="Valentina Restrepo">VR</div>
+        <!-- ONLINE STATUS INDICATOR -->
+        <div class="status-dot"></div>
+      </div>
+      <!-- EMPLOYEE NAME — Valentina Restrepo -->
+      <div class="profile-name">Valentina Restrepo</div>
+      <!-- EMPLOYEE ROLE — Senior Product Designer -->
+      <div class="profile-role">Senior Product Designer</div>
+      <!-- EMPLOYEE SALARY — $94,500/year -->
+      <div class="salary-badge" title="Salario anual">$94,500 / año</div>
+      <div class="profile-meta">
+        <div class="profile-meta-row">
+          <!-- DEPARTMENT -->
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          <!-- EMPLOYEE DEPARTMENT — Design & Innovation -->
+          Diseño &amp; Innovación
+        </div>
+        <div class="profile-meta-row">
+          <!-- LOCATION — Medellín, Colombia -->
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Medellín, Colombia
+        </div>
+        <div class="profile-meta-row">
+          <!-- START DATE — March 2021 -->
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Desde Marzo 2021
+        </div>
+      </div>
+    </div>
+
+    <!-- BAR CHART CARD -->
+    <div class="card chart-card">
+      <div class="chart-title">Horas trabajadas esta semana</div>
+      <div class="chart-sub">Semana del 9 – 15 de junio · Meta: 40h</div>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+
+    <!-- KPI CHIPS -->
+    <div class="kpi-row">
+      <div class="kpi-chip" style="animation-delay:0.1s">
+        <div class="kpi-icon">👥</div>
+        <div>
+          <div class="kpi-num">142</div>
+          <div class="kpi-label">Empleados</div>
+        </div>
+      </div>
+      <div class="kpi-chip" style="animation-delay:0.2s">
+        <div class="kpi-icon">✨</div>
+        <div>
+          <div class="kpi-num">18</div>
+          <div class="kpi-label">Contrataciones</div>
+        </div>
+      </div>
+      <div class="kpi-chip" style="animation-delay:0.3s">
+        <div class="kpi-icon">🚀</div>
+        <div>
+          <div class="kpi-num">34</div>
+          <div class="kpi-label">Proyectos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMER / DONUT -->
+    <div class="card timer-card">
+      <div class="donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="donut-track" cx="60" cy="60" r="50"/>
+          <circle class="donut-fill" id="donutFill" cx="60" cy="60" r="50"
+            stroke-dasharray="314" stroke-dashoffset="314"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timerDisplay">00:00</div>
+          <div class="timer-label">trabajadas hoy</div>
+        </div>
+      </div>
+      <div class="timer-controls">
+        <button class="timer-btn" id="timerBtn" onclick="toggleTimer()">▶ Iniciar</button>
+        <button class="timer-btn" onclick="resetTimer()">↺</button>
+      </div>
+    </div>
+
+    <!-- CALENDAR CARD -->
+    <div class="card calendar-card">
+      <div class="chart-title" style="margin-bottom:16px">Semana actual</div>
+      <div class="week-strip" id="weekStrip"></div>
+      <div class="cal-events">
+        <div class="cal-event" style="background:rgba(245,200,66,0.12)">
+          <div class="cal-event-dot" style="background:var(--accent)"></div>
+          <span>Revisión de Sprint Q2</span>
+          <div class="cal-avatars">
+            <div class="cal-avatar" style="background:#6366F1">VR</div>
+            <div class="cal-avatar" style="background:#F59E0B">CM</div>
+          </div>
+          <span class="cal-event-time">10:00 AM</span>
+        </div>
+        <div class="cal-event" style="background:rgba(99,102,241,0.1)">
+          <div class="cal-event-dot" style="background:#6366F1"></div>
+          <span>Demo con cliente — Bancolombia</span>
+          <div class="cal-avatars">
+            <div class="cal-avatar" style="background:#22C55E">JS</div>
+            <div class="cal-avatar" style="background:#EF4444">AL</div>
+          </div>
+          <span class="cal-event-time">2:30 PM</span>
+        </div>
+        <div class="cal-event" style="background:rgba(168,213,181,0.15)">
+          <div class="cal-event-dot" style="background:var(--green)"></div>
+          <span>1:1 con Felipe Mora</span>
+          <div class="cal-avatars">
+            <div class="cal-avatar" style="background:#F97316">FM</div>
+          </div>
+          <span class="cal-event-time">4:00 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONBOARDING CARD (dark) -->
+    <div class="card card-dark onboarding-card">
+      <div class="onboarding-header">
+        <div class="onboarding-title">Onboarding</div>
+        <div class="onboarding-counter" id="taskCounter">3/8</div>
+      </div>
+      <div class="onboarding-progress">
+        <div class="onboarding-bar" id="onboardingBar" style="width:37.5%"></div>
+      </div>
+      <div class="task-list" id="taskList"></div>
+    </div>
+
+    <!-- ACCORDION CARD -->
+    <div class="card accordion-card">
+      <div class="accordion-title-main">Mi información</div>
+      <div class="accordion-item open" id="acc-benefits">
+        <div class="accordion-header" onclick="toggleAccordion('acc-benefits')">
+          <span>💰 Beneficios</span>
+          <span class="accordion-chevron">›</span>
+        </div>
+        <div class="accordion-body">
+          <ul>
+            <li>Seguro médico familiar Premium</li>
+            <li>15 días de vacaciones</li>
+            <li>Bono de desempeño anual</li>
+            <li>Trabajo remoto flexible</li>
+          </ul>
+        </div>
+      </div>
+      <div class="accordion-item" id="acc-devices">
+        <div class="accordion-header" onclick="toggleAccordion('acc-devices')">
+          <span>💻 Dispositivos</span>
+          <span class="accordion-chevron">›</span>
+        </div>
+        <div class="accordion-body">
+          <ul>
+            <li>MacBook Pro M3 (16")</li>
+            <li>Monitor LG 4K 27"</li>
+            <li>iPhone 15 Pro corporativo</li>
+          </ul>
+        </div>
+      </div>
+      <div class="accordion-item" id="acc-comp">
+        <div class="accordion-header" onclick="toggleAccordion('acc-comp')">
+          <span>📊 Compensación</span>
+          <span class="accordion-chevron">›</span>
+        </div>
+        <div class="accordion-body">
+          <ul>
+            <li>Salario base: $94,500/año</li>
+            <li>Bono Q2: $4,200</li>
+            <li>Equity: 0.05%</li>
+          </ul>
+        </div>
+      </div>
+      <div class="accordion-item" id="acc-time">
+        <div class="accordion-header" onclick="toggleAccordion('acc-time')">
+          <span>🕐 Tiempo &amp; Ausencias</span>
+          <span class="accordion-chevron">›</span>
+        </div>
+        <div class="accordion-body">
+          <ul>
+            <li>Días restantes: 11</li>
+            <li>Horas extra este mes: 3.5h</li>
+            <li>Próximas vacaciones: Jul 21</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPEARANCE CARD -->
+    <div class="card appearance-card">
+      <div class="appearance-title">🎨 Apariencia</div>
+      <div class="swatches" id="swatches"></div>
+      <div class="custom-color-row">
+        <span class="custom-color-label">Color personalizado:</span>
+        <input type="color" id="colorPicker" value="#F5C842" onchange="setCustomColor(this.value)" />
+        <div class="custom-preview" id="customPreview" style="background:#F5C842"></div>
+        <span class="custom-hex" id="customHex">#F5C842</span>
+      </div>
+    </div>
+
+  </div><!-- end dashboard-grid -->
+</div><!-- end page-dashboard -->
+
+<!-- ============================================================
+     RANKINGS PAGE
+     ============================================================ -->
+<div class="page" id="page-rankings">
+
+  <!-- SUMMARY STATS -->
+  <div class="rankings-stats">
+    <div class="rank-stat-card card">
+      <div class="rank-stat-num">$2.34M</div>
+      <div class="rank-stat-label">Revenue Total Q2</div>
+    </div>
+    <div class="rank-stat-card card">
+      <div class="rank-stat-num">58.2%</div>
+      <div class="rank-stat-label">Tasa de Conversión Promedio</div>
+    </div>
+    <div class="rank-stat-card card">
+      <div class="rank-stat-num">6</div>
+      <div class="rank-stat-label">Agentes Rankeados</div>
+    </div>
+  </div>
+
+  <div class="rankings-grid">
+
+    <!-- REVENUE LEADERBOARD -->
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title">💰 Revenue Leaders</div>
+        <div class="period-pill">Q2 2025</div>
+      </div>
+      <div id="revenueList"></div>
+    </div>
+
+    <!-- CONVERSION RATE LEADERBOARD -->
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title">🎯 Conversion Rate Leaders</div>
+        <div class="period-pill">Q2 2025</div>
+      </div>
+      <div id="crList"></div>
+    </div>
+
+  </div>
+</div><!-- end page-rankings -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* =========================================================
+   DATA — Fictional Colombian Sales Team
+   ========================================================= */
+
+/* EMPLOYEE NAME — Revenue Ranking */
+const revenueData = [
+  /* EMPLOYEE NAME — Santiago Gómez */
+  { name: 'Santiago Gómez',    role: 'Sales Lead',         value: '$412,000', pct: 100, trend: '+12%', up: true,  color: '#6366F1', initials: 'SG' },
+  /* EMPLOYEE NAME — Valentina Restrepo */
+  { name: 'Valentina Restrepo',role: 'Sr. Product Designer',value: '$378,500', pct: 92,  trend: '+8%',  up: true,  color: '#F5C842', initials: 'VR' },
+  /* EMPLOYEE NAME — Camila Martínez */
+  { name: 'Camila Martínez',   role: 'Account Executive',  value: '$341,200', pct: 83,  trend: '+5%',  up: true,  color: '#22C55E', initials: 'CM' },
+  /* EMPLOYEE NAME — Andrés López */
+  { name: 'Andrés López',      role: 'Sales Rep',          value: '$298,000', pct: 72,  trend: '-3%',  up: false, color: '#F97316', initials: 'AL' },
+  /* EMPLOYEE NAME — Juan Sebastián Torres */
+  { name: 'Juan S. Torres',    role: 'Business Dev.',      value: '$265,400', pct: 64,  trend: '+2%',  up: true,  color: '#EF4444', initials: 'JS' },
+  /* EMPLOYEE NAME — Felipe Mora */
+  { name: 'Felipe Mora',       role: 'Junior Sales',       value: '$148,900', pct: 36,  trend: '-1%',  up: false, color: '#A78BFA', initials: 'FM' },
+];
+
+/* EMPLOYEE NAME — Conversion Rate Ranking */
+const crData = [
+  /* EMPLOYEE NAME — Camila Martínez */
+  { name: 'Camila Martínez',   role: 'Account Executive',  value: '68.4%', pct: 100, trend: '+4.1%', up: true,  color: '#22C55E', initials: 'CM' },
+  /* EMPLOYEE NAME — Santiago Gómez */
+  { name: 'Santiago Gómez',    role: 'Sales Lead',         value: '64.2%', pct: 94,  trend: '+2.3%', up: true,  color: '#6366F1', initials: 'SG' },
+  /* EMPLOYEE NAME — Valentina Restrepo */
+  { name: 'Valentina Restrepo',role: 'Sr. Product Designer',value: '61.7%', pct: 90,  trend: '+1.8%', up: true,  color: '#F5C842', initials: 'VR' },
+  /* EMPLOYEE NAME — Juan Sebastián Torres */
+  { name: 'Juan S. Torres',    role: 'Business Dev.',      value: '55.3%', pct: 81,  trend: '-0.5%', up: false, color: '#EF4444', initials: 'JS' },
+  /* EMPLOYEE NAME — Andrés López */
+  { name: 'Andrés López',      role: 'Sales Rep',          value: '49.1%', pct: 72,  trend: '+0.8%', up: true,  color: '#F97316', initials: 'AL' },
+  /* EMPLOYEE NAME — Felipe Mora */
+  { name: 'Felipe Mora',       role: 'Junior Sales',       value: '38.6%', pct: 56,  trend: '-2.1%', up: false, color: '#A78BFA', initials: 'FM' },
+];
+
+/* =========================================================
+   ONBOARDING TASKS
+   ========================================================= */
+const tasks = [
+  { text: 'Configurar cuenta de correo', time: '9:00 AM', done: true },
+  { text: 'Revisar política de empresa', time: '10:30 AM', done: true },
+  { text: 'Conocer al equipo de diseño', time: '11:00 AM', done: true },
+  { text: 'Instalar herramientas de trabajo', time: '2:00 PM', done: false },
+  { text: 'Completar perfil en el sistema', time: '3:00 PM', done: false },
+  { text: 'Asistir a onboarding general', time: 'Jun 13', done: false },
+  { text: 'Primera reunión con manager', time: 'Jun 14', done: false },
+  { text: 'Entrega de credenciales VPN', time: 'Jun 15', done: false },
+];
+
+/* =========================================================
+   COLOR SWATCHES
+   ========================================================= */
+const presets = [
+  { hex: '#F5C842', dark: '#d4a800', name: 'Golden'   },
+  { hex: '#FF6B6B', dark: '#cc3333', name: 'Coral'    },
+  { hex: '#4ECDC4', dark: '#2a9d96', name: 'Mint'     },
+  { hex: '#A78BFA', dark: '#7c3aed', name: 'Lavender' },
+  { hex: '#3B82F6', dark: '#1d4ed8', name: 'Ocean'    },
+  { hex: '#22C55E', dark: '#15803d', name: 'Forest'   },
+  { hex: '#FB923C', dark: '#c2410c', name: 'Peach'    },
+  { hex: '#FB7185', dark: '#be123c', name: 'Rose'     },
+];
+
+/* =========================================================
+   BAR CHART DATA
+   ========================================================= */
+const barData = [
+  { day: 'L', h: 7.5 },
+  { day: 'M', h: 8.0 },
+  { day: 'M', h: 6.5 },
+  { day: 'J', h: 9.0 },
+  { day: 'V', h: 7.0, today: true },
+  { day: 'S', h: 3.5 },
+  { day: 'D', h: 0   },
+];
+
+/* =========================================================
+   INIT FUNCTIONS
+   ========================================================= */
+function initBarChart() {
+  const max = Math.max(...barData.map(d => d.h), 1);
+  const container = document.getElementById('barChart');
+  container.innerHTML = barData.map((d, i) => `
+    <div class="bar-wrap">
+      <div class="bar ${d.today ? 'today' : ''} bar"
+           style="height:${(d.h / max) * 100}%;animation-delay:${0.1 + i * 0.05}s"
+           title="${d.h}h"></div>
+      <div class="bar-label">${d.day}</div>
+    </div>
+  `).join('');
+}
+
+function initWeekStrip() {
+  const today = new Date();
+  const dow = today.getDay(); // 0=sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dow + 6) % 7));
+  const days = ['L','M','M','J','V','S','D'];
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = days.map((d, i) => {
+    const dt = new Date(monday);
+    dt.setDate(monday.getDate() + i);
+    const isToday = dt.toDateString() === today.toDateString();
+    return `<div class="day-cell ${isToday ? 'today-cell' : ''}">
+      <div class="day-name">${d}</div>
+      <div class="day-num">${dt.getDate()}</div>
+    </div>`;
+  }).join('');
+}
+
+function initTaskList() {
+  const list = document.getElementById('taskList');
+  list.innerHTML = tasks.map((t, i) => `
+    <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${i})">
+      <div class="task-check">${t.done ? '✓' : ''}</div>
+      <div class="task-text">${t.text}</div>
+      <div class="task-time">${t.time}</div>
+    </div>
+  `).join('');
+  updateTaskCounter();
+}
+
+function toggleTask(i) {
+  tasks[i].done = !tasks[i].done;
+  initTaskList();
+}
+
+function updateTaskCounter() {
+  const done = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+  document.getElementById('taskCounter').textContent = `${done}/${total}`;
+  document.getElementById('onboardingBar').style.width = `${(done / total) * 100}%`;
+}
+
+function initSwatches() {
+  const wrap = document.getElementById('swatches');
+  wrap.innerHTML = presets.map((p, i) => `
+    <div class="swatch ${i === 0 ? 'active' : ''}"
+         style="background:${p.hex}"
+         onclick="setAccent('${p.hex}','${p.dark}',${i})"
+         title="${p.name}">
+      ${i === 0 ? '✓' : ''}
+    </div>
+  `).join('');
+}
+
+function setAccent(hex, dark, idx) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  document.documentElement.style.setProperty('--accent', hex);
+  document.documentElement.style.setProperty('--accent-rgb', `${r},${g},${b}`);
+  document.documentElement.style.setProperty('--accent-dark', dark);
+  document.querySelectorAll('.swatch').forEach((s, i) => {
+    s.classList.toggle('active', i === idx);
+    s.textContent = i === idx ? '✓' : '';
+  });
+  document.getElementById('colorPicker').value = hex;
+  document.getElementById('customPreview').style.background = hex;
+  document.getElementById('customHex').textContent = hex;
+}
+
+function setCustomColor(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  const dark = `rgb(${Math.max(0,r-40)},${Math.max(0,g-40)},${Math.max(0,b-40)})`;
+  document.documentElement.style.setProperty('--accent', hex);
+  document.documentElement.style.setProperty('--accent-rgb', `${r},${g},${b}`);
+  document.documentElement.style.setProperty('--accent-dark', dark);
+  document.getElementById('customPreview').style.background = hex;
+  document.getElementById('customHex').textContent = hex;
+  document.querySelectorAll('.swatch').forEach(s => { s.classList.remove('active'); s.textContent = ''; });
+}
+
+function initRankings() {
+  function buildRow(item, idx) {
+    const medals = ['medal-1','medal-2','medal-3'];
+    const medalClass = idx < 3 ? medals[idx] : 'medal-n';
+    const medalLabel = idx < 3 ? ['🥇','🥈','🥉'][idx] : idx + 1;
+    return `
+      <div class="ranking-row" style="animation-delay:${idx * 0.07}s">
+        <div class="medal ${medalClass}">${medalLabel}</div>
+        <div class="rank-avatar" style="background:${item.color}">${item.initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${item.name}</div>
+          <div class="rank-role">${item.role}</div>
+        </div>
+        <div class="rank-bar-wrap">
+          <div class="rank-bar-bg">
+            <div class="rank-bar-fill" style="width:${item.pct}%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="rank-value">${item.value}</div>
+          <div class="rank-trend ${item.up ? 'trend-up' : 'trend-down'}">${item.up ? '↑' : '↓'} ${item.trend}</div>
+        </div>
+      </div>
+    `;
+  }
+  document.getElementById('revenueList').innerHTML = revenueData.map(buildRow).join('');
+  document.getElementById('crList').innerHTML = crData.map(buildRow).join('');
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+let timerSec = 0, timerRunning = false, timerInterval = null;
+const MAX_SECS = 8 * 3600;
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  document.getElementById('timerBtn').textContent = timerRunning ? '⏸ Pausar' : '▶ Continuar';
+  if (timerRunning) {
+    timerInterval = setInterval(() => {
+      timerSec = Math.min(timerSec + 1, MAX_SECS);
+      updateTimerUI();
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false; timerSec = 0;
+  document.getElementById('timerBtn').textContent = '▶ Iniciar';
+  updateTimerUI();
+}
+
+function updateTimerUI() {
+  const h = Math.floor(timerSec / 3600);
+  const m = Math.floor((timerSec % 3600) / 60);
+  const s = timerSec % 60;
+  document.getElementById('timerDisplay').textContent =
+    h > 0 ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const circ = 314;
+  const offset = circ - (timerSec / MAX_SECS) * circ;
+  document.getElementById('donutFill').style.strokeDashoffset = offset;
+}
+
+/* =========================================================
+   ACCORDION
+   ========================================================= */
+function toggleAccordion(id) {
+  const item = document.getElementById(id);
+  item.classList.toggle('open');
+}
+
+/* =========================================================
+   THEME TOGGLE
+   ========================================================= */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeToggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+}
+
+/* =========================================================
+   TAB NAVIGATION
+   ========================================================= */
+function switchTab(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const tabEl = document.getElementById('tab-' + page);
+  if (tabEl) tabEl.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* =========================================================
+   INIT ALL
+   ========================================================= */
+initBarChart();
+initWeekStrip();
+initTaskList();
+initSwatches();
+initRankings();
+</script>
+</body>
+</html>
